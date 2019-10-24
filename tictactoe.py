@@ -1,58 +1,6 @@
-"""For testing our game"""
-import unittest
+"""Tictactoe game implementation.
 
-
-class TestTicTacToeItems(unittest.TestCase):
-    """Testing our game.
-
-    Using the imported unittest."""
-
-    def test_checkwin(self):
-
-        """The testing function.
-
-        Asserts check_win works correctly."""
-
-        for_test = TicTacToe()
-        for_test.my_init([[1, 2, 'X'], ['0', '0', 'X'], [7, 8, 'X']])
-        self.assertEqual(for_test.check_win(), 1)
-        for_test.my_init([['X', 2, 3], ['0', 'X', 'X'], ['0', '0', 'X']])
-        self.assertEqual(for_test.check_win(), 1)
-        for_test.my_init([[1, 2, 'X'], ['0', '0', '0'], [7, 'X', 'X']])
-        self.assertEqual(for_test.check_win(), 1)
-        for_test.my_init([['0', '0', 'X'], ['0', 5, 'X'], ['0', 8, 9]])
-        self.assertEqual(for_test.check_win(), 1)
-        for_test.my_init([[1, 2, 'X'], ['0', '0', 'X'], ['X', 8, 9]])
-        self.assertEqual(for_test.check_win(), 0)
-        for_test.my_init([['0', 'X', '0'], ['0', 'X', 'X'], ['X', '0', 'X']])
-        self.assertEqual(for_test.check_win(), 0)
-        for_test.my_init([['0', 2, '0'], ['0', 'X', 'X'], ['X', 8, 'X']])
-        self.assertEqual(for_test.check_win(), 0)
-        for_test.my_init([[1, '0', 'X'], ['0', '0', 'X'], ['X', 8, '0']])
-        self.assertEqual(for_test.check_win(), 0)
-        for_test.my_init([['X', 2, 'X'], ['0', 'X', 'X'], ['0', 8, '0']])
-        self.assertEqual(for_test.check_win(), 0)
-
-    def test_play(self):
-        """The testing function.
-
-        Asserts play works correctly."""
-
-        for_test = TicTacToe()
-        for_test.my_init([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
-        self.assertEqual(for_test.play(1), [['X', 2, 3], [4, 5, 6], [7, 8, 9]])
-        for_test.my_init([[1, 2, 3], ['X', 5, 6], [7, 8, 9]])
-        self.assertEqual(for_test.play(5), [[1, 2, 3], ['X', '0', 6], [7, 8, 9]])
-        for_test.my_init([['X', '0', 3], [4, 5, 6], [7, 8, 9]])
-        self.assertEqual(for_test.play(8), [['X', '0', 3], [4, 5, 6], [7, 'X', 9]])
-        for_test.my_init([['X', '0', 'X'], ['0', 'X', '0'], [7, 8, 9]])
-        self.assertEqual(for_test.play(7), [['X', '0', 'X'], ['0', 'X', '0'], ['X', 8, 9]])
-        for_test.my_init([['X', '0', 3], [4, 5, 'X'], [7, 'X', '0']])
-        self.assertEqual(for_test.play(4), [['X', '0', 3], ['0', 5, 'X'], [7, 'X', '0']])
-        for_test.my_init([[1, 'X', 3], ['0', 5, 'X'], [7, 8, 9]])
-        self.assertEqual(for_test.play(1), [['0', 'X', 3], ['0', 5, 'X'], [7, 8, 9]])
-        for_test.my_init([[1, 'X', 3], ['0', 'X', 6], [7, '0', 9]])
-        self.assertEqual(for_test.play(1), [['X', 'X', 3], ['0', 'X', 6], [7, '0', 9]])
+Just for fun."""
 
 
 class TicTacToe:
@@ -139,23 +87,16 @@ class TicTacToe:
         self.curr_board[(in_place - 1) // 3][(in_place - 1) % 3] = '0' if self.curr_play else 'X'
         return self.curr_board
 
+    def main(self):
+        """The playing.
 
-OUR_GAME = TicTacToe()
-IS_DRAW = True
-for num_move in range(9):
-    OUR_GAME.print_out()
-    print("First player's turn:" if not OUR_GAME.curr_play else "Second player's turn")
-    place = 0
-    entered_valid = 0
-    while not entered_valid:
-        try:
-            place = int(input())
-            entered_valid = 1
-        except ValueError:
-            print("Please enter a valid number")
-    while place in OUR_GAME.used_cell or place < 1 or place > 9:
-        if place in OUR_GAME.used_cell:
-            print("This cell is already used")
+        Main part.
+        """
+        is_draw = True
+        for _ in range(9):
+            self.print_out()
+            print("First player's turn:" if not self.curr_play else "Second player's turn")
+            place = 0
             entered_valid = 0
             while not entered_valid:
                 try:
@@ -163,21 +104,36 @@ for num_move in range(9):
                     entered_valid = 1
                 except ValueError:
                     print("Please enter a valid number")
-        else:
-            print("This number of cell is not valid")
-            entered_valid = 0
-            while not entered_valid:
-                try:
-                    place = int(input())
-                    entered_valid = 1
-                except ValueError:
-                    print("Please enter a valid number")
-    OUR_GAME.used_cell.append(place)
-    OUR_GAME.play(place)
-    OUR_GAME.curr_play = not OUR_GAME.curr_play
-    if OUR_GAME.check_win():
-        IS_DRAW = False
-        break
-if IS_DRAW:
-    OUR_GAME.print_out()
-    print("Draw!")
+            while place in self.used_cell or place < 1 or place > 9:
+                if place in self.used_cell:
+                    print("This cell is already used")
+                    entered_valid = 0
+                    while not entered_valid:
+                        try:
+                            place = int(input())
+                            entered_valid = 1
+                        except ValueError:
+                            print("Please enter a valid number")
+                else:
+                    print("This number of cell is not valid")
+                    entered_valid = 0
+                    while not entered_valid:
+                        try:
+                            place = int(input())
+                            entered_valid = 1
+                        except ValueError:
+                            print("Please enter a valid number")
+            self.used_cell.append(place)
+            self.play(place)
+            self.curr_play = not self.curr_play
+            if self.check_win():
+                is_draw = False
+                break
+        if is_draw:
+            self.print_out()
+            print("Draw!")
+
+
+if __name__ == '__main__':
+    GAME = TicTacToe()
+    GAME.main()
