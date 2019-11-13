@@ -1,5 +1,15 @@
-from django.http import JsonResponse, HttpResponseNotAllowed
+from django.http import JsonResponse, HttpResponseNotAllowed, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
+from users.models import *
+
+
+@csrf_exempt
+def find_users(request):
+    if request.method == 'GET':
+        user = User.objects.filter(name__in=request.GET.get('name'))
+        return HttpResponse
+    else:
+        return HttpResponseNotAllowed(['GET'])
 
 
 @csrf_exempt
