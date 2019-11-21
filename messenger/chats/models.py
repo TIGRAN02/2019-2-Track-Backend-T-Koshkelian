@@ -6,9 +6,9 @@ class Chat(models.Model):
     tag = models.CharField(max_length=50, unique=True, verbose_name='Тег для поиска')
     is_group = models.BooleanField(default=False, verbose_name='Является ли чат группой')
     is_channel = models.BooleanField(default=False, verbose_name='Является ли чат каналом')
-    author = models.ForeignKey('users.User', on_delete=models.CASCADE, blank=True, verbose_name='Автор чата')
-    bio = models.TextField(blank=True, verbose_name='Описание чата')
-    last_message = models.TextField(blank=True, verbose_name='Последнее сообщение в чате')
+    author = models.ForeignKey('users.User', on_delete=models.CASCADE, blank=True, null=True, verbose_name='Автор чата')
+    bio = models.TextField(blank=True, null=True, verbose_name='Описание чата')
+    last_message = models.TextField(blank=True, null=True, verbose_name='Последнее сообщение в чате')
 
     class Meta:
         verbose_name = 'Чат'
@@ -19,7 +19,7 @@ class Message(models.Model):
     chat = models.ForeignKey(Chat, on_delete=models.CASCADE, verbose_name='Чат')
     user = models.ForeignKey('users.User', on_delete=models.CASCADE, verbose_name='Пользователь')
     content = models.TextField(verbose_name='Содержание')
-    sent_time = models.DateTimeField(auto_now_add=True, verbose_name='Время отправки')
+    sent_time = models.DateTimeField(auto_now_add=True, null=True, verbose_name='Время отправки')
 
     class Meta:
         verbose_name = 'Сообщение'

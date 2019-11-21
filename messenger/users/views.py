@@ -1,48 +1,47 @@
-from django.http import JsonResponse, HttpResponseNotAllowed, HttpResponse
+from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
-from users.models import *
+from django.views.decorators.http import require_GET, require_POST
+from users.forms import *
 
 
 @csrf_exempt
+@require_GET
 def find_users(request):
-    if request.method == 'GET':
-        user = User.objects.filter(name__in=request.GET.get('name'))
-        return HttpResponse
-    else:
-        return HttpResponseNotAllowed(['GET'])
+    users = list(User.objects.filter(username__startswith=request.GET.get('name')).values('id', 'username'))
+    return JsonResponse({
+        'users': users
+    })
 
 
+# TODO: после реализации аутентификации выводить данные нашего пользователя, а не переданного
 @csrf_exempt
+@require_GET
 def chat_profile(request):
-    if request.method == 'GET':
-        age = request.GET.get('age')
-        if age is None:
-            age = 17
-        name = request.GET.get('name')
-        if name is None:
-            name = 'Tigran'
-        num_of_messages = request.GET.get('num_of_messages')
-        if num_of_messages is None:
-            num_of_messages = 10
-        return JsonResponse({'name': name, 'age': age, 'messages': num_of_messages})
-    else:
-        return HttpResponseNotAllowed(['GET'])
+    try:
+        curr_user = User.objects.get(id=request.GET.get('id'))
+    except User.DoesNotExist:
+        return HttpResponse('No such user')
+    return JsonResponse({'name': curr_user.username,
+                         'tag': curr_user.tag,
+                         'bio': curr_user.bio})
 
 
 @csrf_exempt
+@require_GET
 def contacts(request):
-    if request.method == 'GET':
-        return JsonResponse({'contacts': ['Общество целых бокалов',
-                                          'Дженнифер Эшли',
-                                          'Антон Иванов',
-                                          'Серёга (должен 2000)',
-                                          'Общество разбитых бокалов',
-                                          'Сэм с Нижнего',
-                                          'Айрат работа',
-                                          'Кеша армия',
-                                          'Первый курс ФПМИ-Наука 2019-2020',
-                                          'Контакт без сообщений',
-                                          'Контакт в чс',
-                                          'Игнорить этот контакт']})
+    users = list(User.objects.all().values('username'))
+    return JsonResponse({'contacts': users})
+
+
+@csrf_exempt
+@require_POST
+def read_message(request):
+    form = ReadMessage(request.POST)
+    if form.is_valid():
+        form.save()
+        return JsonResponse({
+            'msg': 'Сообщение помечено как прочитанное',
+        })
     else:
-        return HttpResponseNotAllowed(['GET'])
+        return JsonResponse({'errors': form.errors}, status=400)
+

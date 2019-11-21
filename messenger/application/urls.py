@@ -15,10 +15,12 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from .views import fill_db
 
 
 urlpatterns = [
     path('users/', include('users.urls')),
-    path('admin/', admin.site.urls),
     path('chats/', include('chats.urls')),
+    path('fill_db/', fill_db, name='fill_db'),
+    path('admin/', admin.site.urls),
 ]
