@@ -1,3 +1,4 @@
+import json
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_POST
@@ -7,23 +8,42 @@ from users.forms import *
 @csrf_exempt
 @require_GET
 def find_users(request):
-    users = list(User.objects.filter(username__startswith=request.GET.get('name')).values('id', 'username'))
+    try:
+        users = list(User.objects.filter(username__startswith=request.GET.get('name')).values('id', 'username'))
+    except ValueError:
+        users = list(User.objects.filter(tag__startswith=request.GET.get('tag')).values('id', 'username', 'tag'))
     return JsonResponse({
         'users': users
     })
 
 
-# TODO: после реализации аутентификации выводить данные нашего пользователя, а не переданного
 @csrf_exempt
 @require_GET
-def chat_profile(request):
+def user_profile(request):
     try:
-        curr_user = User.objects.get(id=request.GET.get('id'))
+        if request.GET.get('id') is not None:
+            curr_user = User.objects.get(id=request.GET.get('id'))
+        else:
+            curr_user = User.objects.get(tag=request.GET.get('tag'))
     except User.DoesNotExist:
-        return HttpResponse('No such user')
+        return JsonResponse({'error': 'no such user'}, status=400)
     return JsonResponse({'name': curr_user.username,
                          'tag': curr_user.tag,
-                         'bio': curr_user.bio})
+                         'bio': curr_user.bio,
+                         'id': curr_user.id})
+
+
+@csrf_exempt
+@require_POST
+def set_user(request):
+    form = SetUserForm(json.loads(request.body))
+    if form.is_valid():
+        form.save()
+        return JsonResponse({
+            'msg': 'Данные пользователя изменены',
+        })
+    else:
+        return JsonResponse({'errors': form.errors}, status=400)
 
 
 @csrf_exempt
@@ -36,7 +56,7 @@ def contacts(request):
 @csrf_exempt
 @require_POST
 def read_message(request):
-    form = ReadMessage(request.POST)
+    form = ReadMessageForm(request.POST)
     if form.is_valid():
         form.save()
         return JsonResponse({

@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils.timezone import now
 
 
 class Chat(models.Model):
@@ -18,22 +19,12 @@ class Chat(models.Model):
 class Message(models.Model):
     chat = models.ForeignKey(Chat, on_delete=models.CASCADE, verbose_name='Чат')
     user = models.ForeignKey('users.User', on_delete=models.CASCADE, verbose_name='Пользователь')
-    content = models.TextField(verbose_name='Содержание')
-    sent_time = models.DateTimeField(auto_now_add=True, null=True, verbose_name='Время отправки')
+    content = models.TextField(null=True, verbose_name='Содержание')
+    time = models.DateTimeField(default=now, null=True, verbose_name='Время отправки')
+    type = models.CharField(max_length=15, default='text', verbose_name='Тип сообщения')
+    url = models.URLField(null=True, verbose_name='Ссылка на фото')
 
     class Meta:
         verbose_name = 'Сообщение'
         verbose_name_plural = 'Сообщения'
-        ordering = ['-sent_time']
-
-
-class Attachment(models.Model):
-    chat = models.ForeignKey(Chat, on_delete=models.CASCADE, verbose_name='Чат')
-    message = models.ForeignKey(Message, on_delete=models.CASCADE, verbose_name='Сообщение')
-    type = models.CharField(max_length=20, verbose_name='Тип')
-    url = models.URLField(verbose_name='Ссылка')
-
-    class Meta:
-        verbose_name = 'Вложение'
-        verbose_name_plural = 'Вложения'
-
+        ordering = ['-time']

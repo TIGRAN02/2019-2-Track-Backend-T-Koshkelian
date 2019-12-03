@@ -13,7 +13,7 @@ class NewChatForm(forms.Form):
             User.objects.get(tag=first)
         except User.DoesNotExist:
             self.add_error('first_tag', 'no such user')
-        return self.cleaned_data['first_tag']
+        return first
 
     def clean_second_tag(self):
         second = self.cleaned_data['second_tag']
@@ -21,7 +21,7 @@ class NewChatForm(forms.Form):
             User.objects.get(tag=second)
         except User.DoesNotExist:
             self.add_error('second_tag', 'no such user')
-        return self.cleaned_data['second_tag']
+        return second
 
     def clean(self):
         first = self.cleaned_data['first_tag']
@@ -52,8 +52,10 @@ class NewChatForm(forms.Form):
 
 class SendMessageForm(forms.Form):
     chat_tag = forms.CharField(max_length=50)
-    user_tag = forms.CharField(max_length=50)
-    content = forms.CharField(max_length=1024)
+    user_id = forms.CharField(max_length=50)
+    type = forms.CharField(max_length=15)
+    content = forms.CharField(required=False, max_length=1024)
+    url = forms.CharField(required=False, max_length=100)
 
     def clean_chat_tag(self):
         chat = self.cleaned_data['chat_tag']
@@ -63,17 +65,25 @@ class SendMessageForm(forms.Form):
             self.add_error('chat_tag', 'no such chat')
         return self.cleaned_data['chat_tag']
 
-    def clean_user_tag(self):
-        user = self.cleaned_data['user_tag']
+    def clean_user_id(self):
+        user = self.cleaned_data['user_id']
         try:
-            User.objects.get(tag=user)
+            User.objects.get(id=user)
         except User.DoesNotExist:
-            self.add_error('user_tag', 'no such user')
-        return self.cleaned_data['user_tag']
+            self.add_error('user_id', 'no such user')
+        return self.cleaned_data['user_id']
 
     def clean(self):
+        if self.cleaned_data['type'] == 'text':
+            if self.cleaned_data['content'] is None:
+                self.add_error('content', 'text message with no content')
+        else:
+            if self.cleaned_data['type'] == 'audio' or self.cleaned_data['type'] == 'image':
+                if self.cleaned_data['url'] is None:
+                    self.add_error('url', self.cleaned_data['type'] + ' message with no url')
+
         chat = Chat.objects.get(tag=self.cleaned_data['chat_tag'])
-        user = User.objects.get(tag=self.cleaned_data['user_tag'])
+        user = User.objects.get(id=self.cleaned_data['user_id'])
         try:
             Member.objects.get(user=user, chat=chat)
         except Member.DoesNotExist:
@@ -81,8 +91,14 @@ class SendMessageForm(forms.Form):
 
     def save(self):
         chat = Chat.objects.get(tag=self.cleaned_data['chat_tag'])
-        user = User.objects.get(tag=self.cleaned_data['user_tag'])
+        user = User.objects.get(id=self.cleaned_data['user_id'])
 
-        Message.objects.create(chat=chat,
-                               user=user,
-                               content=self.cleaned_data['content'])
+        if self.cleaned_data['type'] == 'text':
+            Message.objects.create(chat=chat,
+                                   user=user,
+                                   content=self.cleaned_data['content'])
+        else:
+            Message.objects.create(chat=chat,
+                                   user=user,
+                                   type=self.cleaned_data['type'],
+                                   url=self.cleaned_data['url'])
