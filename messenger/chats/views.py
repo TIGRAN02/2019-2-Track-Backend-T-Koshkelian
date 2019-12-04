@@ -1,24 +1,20 @@
 import json
+
 from django.db.models import F
-from django.shortcuts import render
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST, require_GET
+
 from chats.forms import *
-
-
-@csrf_exempt
-@require_GET
-def index(request):
-    return render(request, 'index.html')
 
 
 @csrf_exempt
 @require_POST
 def create_chat(request):
-    form = NewChatForm(request.POST)
+    form = NewChatForm(json.loads(request.body))
     if form.is_valid():
         form.save()
+        
         return JsonResponse({
             'msg': 'Чат создан',
         })
@@ -55,10 +51,15 @@ def chat_list(request):
             continue
         curr_messages = Message.objects.filter(chat__tag=chats[iterator]['tag'])
         chats[iterator]['indicator'] = len(curr_messages)
-        last_mess = curr_messages[0]
-        chats[iterator]['lastType'] = last_mess.type
-        chats[iterator]['lastMessage'] = last_mess.content or last_mess.url
-        chats[iterator]['lastTime'] = last_mess.time.strftime('%H:%M')
+        if len(curr_messages) > 0:
+            last_mess = curr_messages[0]
+            chats[iterator]['lastType'] = last_mess.type
+            chats[iterator]['lastMessage'] = last_mess.content or last_mess.url
+            chats[iterator]['lastTime'] = last_mess.time.strftime('%H:%M')
+        else:
+            chats[iterator]['lastType'] = ''
+            chats[iterator]['lastMessage'] = ''
+            chats[iterator]['lastTime'] = ''
         iterator += 1
     return JsonResponse({'chats': chats})
 
@@ -69,7 +70,7 @@ def one_chat(request):
     try:
         chat = Chat.objects.get(tag=request.GET.get('tag'))
     except Chat.DoesNotExist:
-        return HttpResponse(request.GET.get('tag'))
+        return HttpResponse('Chat does not exist')
     messages = Message.objects.annotate(whose=F('user__id')).filter(chat=chat).values('id',
                                                                                       'content',
                                                                                       'time',
@@ -80,3 +81,12 @@ def one_chat(request):
         if messages[i]['type'] != 'text':
             messages[i]['url'] = Message.objects.get(id=messages[i]['id']).url
     return JsonResponse({'messages': list(messages)})
+
+
+@csrf_exempt
+@require_GET
+def chat_detail(request):
+    chat = Chat.objects.annotate(whose=F('author__id'), channel=F('is_channel')). \
+        filter(tag=request.GET.get('tag')). \
+        values('whose', 'channel')
+    return JsonResponse({'chat': list(chat)})

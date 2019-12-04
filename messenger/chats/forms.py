@@ -1,53 +1,76 @@
 from django import forms
+
 from chats.models import *
 from users.models import *
 
 
 class NewChatForm(forms.Form):
-    first_tag = forms.CharField(max_length=50)
-    second_tag = forms.CharField(max_length=50)
-
-    def clean_first_tag(self):
-        first = self.cleaned_data['first_tag']
+    name = forms.CharField(max_length=50)
+    tag = forms.CharField(max_length=50)
+    bio = forms.CharField(widget=forms.Textarea, required=False)
+    creator = forms.CharField(max_length=50)
+    members = forms.CharField(widget=forms.Textarea, required=False)
+    is_channel = forms.CharField(max_length=10)
+    
+    def clean_tag(self):
         try:
-            User.objects.get(tag=first)
-        except User.DoesNotExist:
-            self.add_error('first_tag', 'no such user')
-        return first
-
-    def clean_second_tag(self):
-        second = self.cleaned_data['second_tag']
-        try:
-            User.objects.get(tag=second)
-        except User.DoesNotExist:
-            self.add_error('second_tag', 'no such user')
-        return second
-
-    def clean(self):
-        first = self.cleaned_data['first_tag']
-        second = self.cleaned_data['second_tag']
-        try:
-            Chat.objects.get(tag='@' + first + second)
-            self.add_error('chat', 'already exists')
+            Chat.objects.get(tag=self.cleaned_data['tag'])
+            self.add_error('tag', 'tag already exists')
         except Chat.DoesNotExist:
+            pass
+        
+        to_ret = self.cleaned_data['tag'].replace(" ", "")
+        if self.cleaned_data['tag'][0] != '@':
+            to_ret = '@' + to_ret
+        return to_ret
+    
+    def clean_creator(self):
+        try:
+            User.objects.get(id=self.cleaned_data['creator'])
+        except User.DoesNotExist:
+            self.add_error('creator', 'no such user')
+        return self.cleaned_data['creator']
+    
+    def clean_members(self):
+        real_members = self.cleaned_data['members'].split(' ')
+    
+        for i in range(len(real_members)):
             try:
-                Chat.objects.get(tag='@' + second + first)
-                self.add_error('chat', 'already exists')
-            except Chat.DoesNotExist:
-                pass
+                User.objects.get(tag=real_members[i])
+            except User.DoesNotExist:
+                self.add_error('members', 'no user')
+    
+        return self.cleaned_data['members']
+    
+    def clean(self):
+        real_members = self.cleaned_data['members'].split(' ')
+        
+        if len(real_members) == 0 and not self.cleaned_data['is_channel']:
+            self.add_error('members', 'chat must have members')
 
     def save(self):
-        first = self.cleaned_data['first_tag']
-        second = self.cleaned_data['second_tag']
+        real_members = self.cleaned_data['members'].split(' ')
+    
+        if len(real_members) > 1:
+            is_group = True
+        else:
+            is_group = False
+        
+        Chat.objects.create(name=self.cleaned_data['name'],
+                            tag=self.cleaned_data['tag'],
+                            bio=self.cleaned_data['bio'],
+                            author=User.objects.get(id=self.cleaned_data['creator']),
+                            is_channel=self.cleaned_data['is_channel'],
+                            is_group=is_group)
 
-        first_user = User.objects.get(tag=first)
-        second_user = User.objects.get(tag=second)
+        chat = Chat.objects.get(tag=self.cleaned_data['tag'])
+        
+        Member.objects.create(chat=chat,
+                              user=User.objects.get(id=self.cleaned_data['creator']))
 
-        Chat.objects.create(name=first + ' with ' + second, tag='@' + first + second)
-        new_chat = Chat.objects.get(tag='@' + first + second)
-
-        Member.objects.create(user=first_user, chat=new_chat)
-        Member.objects.create(user=second_user, chat=new_chat)
+        for i in range(len(real_members)):
+            curr_user = User.objects.get(tag=real_members[i])
+            Member.objects.create(user=curr_user, chat=chat)
 
 
 class SendMessageForm(forms.Form):

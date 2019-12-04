@@ -1,8 +1,9 @@
-from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.db import models
 
 
 class User(AbstractUser):
+    nick = models.CharField(max_length=50, default='Hummingbird', verbose_name='Ник пользователя')
     tag = models.CharField(max_length=50, unique=True, verbose_name='Тег для поиска')
     bio = models.TextField(default='Newborn Hummingbird', blank=True, null=True, verbose_name='Краткое описание')
     avatar = models.ImageField(blank=True, null=True, verbose_name='Фотография')

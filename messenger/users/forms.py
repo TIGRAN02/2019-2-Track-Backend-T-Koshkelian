@@ -1,7 +1,81 @@
 from django import forms
-from chats.models import Chat, Message
-from users.models import User, Member
 
+from chats.models import *
+from users.models import *
+
+
+class CreateUserForm(forms.Form):
+    name = forms.CharField(max_length=50)
+    tag = forms.CharField(max_length=50)
+    bio = forms.CharField(widget=forms.Textarea, required=False)
+    password = forms.CharField(max_length=50)
+    
+    def clean_tag(self):
+        try:
+            User.objects.get(tag=self.cleaned_data['tag'])
+            self.add_error('tag', 'tag already exists')
+        except User.DoesNotExist:
+            pass
+        if self.cleaned_data['tag'][0] != '@':
+            return '@' + self.cleaned_data['tag'].replace(" ", "")
+        else:
+            return self.cleaned_data['tag'].replace(" ", "")
+    
+    def save(self):
+        if self.cleaned_data['bio'] == '':
+            User.objects.create(nick=self.cleaned_data['name'],
+                                username=self.cleaned_data['tag'],
+                                tag=self.cleaned_data['tag'],
+                                password=self.cleaned_data['password'])
+        else:
+            User.objects.create(nick=self.cleaned_data['name'],
+                                username=self.cleaned_data['tag'],
+                                tag=self.cleaned_data['tag'],
+                                bio=self.cleaned_data['bio'],
+                                password=self.cleaned_data['password'])
+
+
+class AuthForm(forms.Form):
+    tag = forms.CharField(max_length=50)
+    password = forms.CharField(max_length=50)
+    
+    def clean_tag(self):
+        try:
+            User.objects.get(tag=self.cleaned_data['tag'])
+        except User.DoesNotExist:
+            self.add_error('tag', 'no such user')
+        return self.cleaned_data['tag']
+    
+    def clean(self):
+        correct_pass = User.objects.get(tag=self.cleaned_data['tag']).password
+        if self.cleaned_data['password'] != correct_pass:
+            self.add_error('password', 'incorrect password')
+
+
+class ChangePasswordForm(forms.Form):
+    old_password = forms.CharField(max_length=50)
+    new_password = forms.CharField(max_length=50)
+    tag = forms.CharField(max_length=50)
+    
+    def clean_new_password(self):
+        if self.cleaned_data['new_password'] == '':
+            self.add_error('new_password', 'empty password')
+        return self.cleaned_data['new_password']
+    
+    def clean_tag(self):
+        try:
+            User.objects.get(tag=self.cleaned_data['tag'])
+        except User.DoesNotExist:
+            self.add_error('tag', 'no such user')
+        return self.cleaned_data['tag']
+    
+    def clean(self):
+        if self.cleaned_data['old_password'] != User.objects.get(tag=self.cleaned_data['tag']).password:
+            self.add_error('old_password', 'incorrect old password')
+    
+    def save(self):
+        User.objects.filter(tag=self.cleaned_data['tag']).update(password=self.cleaned_data['new_password'])
+            
 
 class ReadMessageForm(forms.Form):
     chat_id = forms.IntegerField()
@@ -49,11 +123,18 @@ class ReadMessageForm(forms.Form):
 class SetUserForm(forms.Form):
     name = forms.CharField(max_length=50)
     tag = forms.CharField(max_length=50)
-    bio = forms.CharField(widget=forms.Textarea)
+    bio = forms.CharField(widget=forms.Textarea, required=False)
     old_tag = forms.CharField(max_length=50)
+    old_password = forms.CharField(max_length=50, required=False)
+    new_password = forms.CharField(max_length=50, required=False)
+
+    def clean_name(self):
+        if self.cleaned_data['name'] == '':
+            self.add_error('name', 'not a valid name')
+        return self.cleaned_data['name']
 
     def clean_tag(self):
-        if self.cleaned_data['tag'][0] != '@':
+        if self.cleaned_data['tag'] == '' or self.cleaned_data['tag'][0] != '@':
             self.add_error('tag', 'not a valid tag')
         return self.cleaned_data['tag']
 
@@ -73,6 +154,6 @@ class SetUserForm(forms.Form):
                 pass
 
     def save(self):
-        User.objects.filter(tag=self.cleaned_data['old_tag']).update(username=self.cleaned_data['name'],
+        User.objects.filter(tag=self.cleaned_data['old_tag']).update(nick=self.cleaned_data['name'],
                                                                      tag=self.cleaned_data['tag'],
                                                                      bio=self.cleaned_data['bio'])
