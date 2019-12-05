@@ -18,10 +18,11 @@ def create_user(request):
             tag = '@' + json.loads(request.body)['tag'].replace(" ", "")
         else:
             tag = json.loads(request.body)['tag'].replace(" ", "")
-        
+
+        print(list(User.objects.filter(tag=tag).values('id')))
         return JsonResponse({
             'msg': 'Пользователь успешно создан',
-            'id': User.objects.get(tag=tag).values('id')
+            'id': list(User.objects.filter(tag=tag).values('id'))
         })
     else:
         return JsonResponse({'errors': form.errors}, status=400)

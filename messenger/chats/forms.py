@@ -31,19 +31,14 @@ class NewChatForm(forms.Form):
             self.add_error('creator', 'no such user')
         return self.cleaned_data['creator']
     
-    def clean_members(self):
-        real_members = self.cleaned_data['members'].split(' ')
-    
-        for i in range(len(real_members)):
-            try:
-                User.objects.get(tag=real_members[i])
-            except User.DoesNotExist:
-                self.add_error('members', 'no user')
-    
-        return self.cleaned_data['members']
-    
     def clean(self):
         real_members = self.cleaned_data['members'].split(' ')
+        
+        try:
+            for i in range(len(real_members)):
+                User.objects.get(tag=real_members[i])
+        except User.DoesNotExist:
+            self.add_error('members', 'no such user')
         
         if len(real_members) == 0 and not self.cleaned_data['is_channel']:
             self.add_error('members', 'chat must have members')
