@@ -11,46 +11,50 @@ class NewChatForm(forms.Form):
     creator = forms.CharField(max_length=50)
     members = forms.CharField(widget=forms.Textarea, required=False)
     is_channel = forms.CharField(max_length=10)
-    
+
     def clean_tag(self):
         try:
             Chat.objects.get(tag=self.cleaned_data['tag'])
             self.add_error('tag', 'tag already exists')
+            return
         except Chat.DoesNotExist:
             pass
-        
+
         to_ret = self.cleaned_data['tag'].replace(" ", "")
         if self.cleaned_data['tag'][0] != '@':
             to_ret = '@' + to_ret
         return to_ret
-    
+
     def clean_creator(self):
         try:
             User.objects.get(id=self.cleaned_data['creator'])
         except User.DoesNotExist:
             self.add_error('creator', 'no such user')
+            return
         return self.cleaned_data['creator']
-    
+
     def clean(self):
         real_members = self.cleaned_data['members'].split(' ')
-        
+
+        if len(real_members) == 1 and real_members[0] == '' and self.cleaned_data['is_channel'] == 'False':
+            self.add_error('members', 'chat must have members')
+            return
+
         try:
             for i in range(len(real_members)):
                 User.objects.get(tag=real_members[i])
         except User.DoesNotExist:
             self.add_error('members', 'no such user')
-        
-        if len(real_members) == 0 and not self.cleaned_data['is_channel']:
-            self.add_error('members', 'chat must have members')
+            return
 
     def save(self):
         real_members = self.cleaned_data['members'].split(' ')
-    
+
         if len(real_members) > 1:
             is_group = True
         else:
             is_group = False
-        
+
         Chat.objects.create(name=self.cleaned_data['name'],
                             tag=self.cleaned_data['tag'],
                             bio=self.cleaned_data['bio'],
@@ -59,7 +63,7 @@ class NewChatForm(forms.Form):
                             is_group=is_group)
 
         chat = Chat.objects.get(tag=self.cleaned_data['tag'])
-        
+
         Member.objects.create(chat=chat,
                               user=User.objects.get(id=self.cleaned_data['creator']))
 
@@ -81,6 +85,7 @@ class SendMessageForm(forms.Form):
             Chat.objects.get(tag=chat)
         except Chat.DoesNotExist:
             self.add_error('chat_tag', 'no such chat')
+            return
         return self.cleaned_data['chat_tag']
 
     def clean_user_id(self):
@@ -89,23 +94,35 @@ class SendMessageForm(forms.Form):
             User.objects.get(id=user)
         except User.DoesNotExist:
             self.add_error('user_id', 'no such user')
+            return
         return self.cleaned_data['user_id']
 
+    def clean_type(self):
+        if self.cleaned_data['type'] not in ['text', 'image', 'audio']:
+            self.add_error('type', 'invalid message type')
+            return
+        return self.cleaned_data['type']
+
     def clean(self):
+        if None in [self.cleaned_data['chat_tag'], self.cleaned_data['user_id'], self.cleaned_data['type']]:
+            return
         if self.cleaned_data['type'] == 'text':
-            if self.cleaned_data['content'] is None:
+            if self.cleaned_data['content'] == '':
                 self.add_error('content', 'text message with no content')
+                return
         else:
             if self.cleaned_data['type'] == 'audio' or self.cleaned_data['type'] == 'image':
-                if self.cleaned_data['url'] is None:
+                if self.cleaned_data['url'] == '':
                     self.add_error('url', self.cleaned_data['type'] + ' message with no url')
+                    return
 
         chat = Chat.objects.get(tag=self.cleaned_data['chat_tag'])
         user = User.objects.get(id=self.cleaned_data['user_id'])
         try:
             Member.objects.get(user=user, chat=chat)
         except Member.DoesNotExist:
-            self.add_error('user', 'no such user in this chat')
+            self.add_error('user_id', 'no such user in this chat')
+            return
 
     def save(self):
         chat = Chat.objects.get(tag=self.cleaned_data['chat_tag'])

@@ -3,4 +3,7 @@ venv/
 *.swo
 *.swp
 messenger/.idea
-
+messenger/application/__pycache__/
+messenger/chats/__pycache__/
+messenger/htmlcov/
+messenger/users/__pycache__/

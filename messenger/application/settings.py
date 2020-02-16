@@ -92,8 +92,11 @@ DATABASES = {
     'NAME': 'messenger',
     'USER': 'tigran',
     'PASSWORD': 'tigrkoshka',
-    'HOST': '127.0.0.1',
+    'HOST': 'localhost',
     'PORT': '5432',
+    'TEST': {
+      'NAME': 'test_db',
+    }
   }
 }
 

@@ -19,7 +19,6 @@ def create_user(request):
         else:
             tag = json.loads(request.body)['tag'].replace(" ", "")
 
-        print(list(User.objects.filter(tag=tag).values('id')))
         return JsonResponse({
             'msg': 'Пользователь успешно создан',
             'id': list(User.objects.filter(tag=tag).values('id'))
@@ -71,9 +70,12 @@ def user_profile(request):
         if request.GET.get('id') is not None:
             curr_user = User.objects.get(id=request.GET.get('id'))
         else:
-            curr_user = User.objects.get(tag=request.GET.get('tag'))
+            if request.GET.get('tag') is not None:
+                curr_user = User.objects.get(tag=request.GET.get('tag'))
+            else:
+                return JsonResponse({'errors': 'no id or tag'}, status=400)
     except User.DoesNotExist:
-        return JsonResponse({'error': 'no such user'}, status=400)
+        return JsonResponse({'errors': 'no such user'}, status=400)
     return JsonResponse({'name': curr_user.nick,
                          'tag': curr_user.tag,
                          'bio': curr_user.bio, })
@@ -95,7 +97,7 @@ def set_user(request):
 @csrf_exempt
 @require_POST
 def read_message(request):
-    form = ReadMessageForm(request.POST)
+    form = ReadMessageForm(json.loads(request.body))
     if form.is_valid():
         form.save()
         return JsonResponse({

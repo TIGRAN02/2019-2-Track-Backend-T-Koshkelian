@@ -38,6 +38,10 @@ def send_message(request):
 @csrf_exempt
 @require_GET
 def chat_list(request):
+    try:
+        User.objects.get(id=request.GET.get('id'))
+    except User.DoesNotExist:
+        return JsonResponse({'errors': 'no such user'}, status=400)
     chats = list(Chat.objects.all().values('name', 'tag'))
     count = len(chats)
     iterator = 0
@@ -70,7 +74,7 @@ def one_chat(request):
     try:
         chat = Chat.objects.get(tag=request.GET.get('tag'))
     except Chat.DoesNotExist:
-        return HttpResponse('Chat does not exist')
+        return HttpResponse('Chat does not exist', status=400)
     messages = Message.objects.annotate(whose=F('user__id')).filter(chat=chat).values('id',
                                                                                       'content',
                                                                                       'time',
