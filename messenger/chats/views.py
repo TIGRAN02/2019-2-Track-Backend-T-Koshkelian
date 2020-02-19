@@ -81,6 +81,7 @@ def one_chat(request):
                                                                                       'type',
                                                                                       'whose')
     for i in range(len(messages)):
+        get_message_info()
         messages[i]['time'] = messages[i]['time'].strftime('%H:%M')
         if messages[i]['type'] != 'text':
             messages[i]['url'] = Message.objects.get(id=messages[i]['id']).url
@@ -94,3 +95,7 @@ def chat_detail(request):
         filter(tag=request.GET.get('tag')). \
         values('whose', 'channel')
     return JsonResponse({'chat': list(chat)})
+
+
+def get_message_info():
+    return 0

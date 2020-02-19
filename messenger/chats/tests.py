@@ -1,6 +1,7 @@
 import json
 
 from django.test import TestCase, Client
+from mock import patch
 
 from chats.factories import *
 
@@ -28,8 +29,8 @@ class CreateChatTest(TestCase):
             'members': '@Michael',
             'is_channel': False
         }
-        response1 = self.client.post('/chats/create_chat/', json.dumps(body1), content_type="application/json")
-        response2 = self.client.post('/chats/create_chat/', json.dumps(body2), content_type="application/json")
+        response1 = self.Client.post('/chats/create_chat/', json.dumps(body1), content_type="application/json")
+        response2 = self.Client.post('/chats/create_chat/', json.dumps(body2), content_type="application/json")
         self.assertEqual(response1.status_code, 200)
         self.assertEqual(response2.status_code, 200)
 
@@ -43,7 +44,7 @@ class CreateChatTest(TestCase):
             'members': '@Michael @Martin @Tigran',
             'is_channel': False
         }
-        response = self.client.post('/chats/create_chat/', json.dumps(body), content_type="application/json")
+        response = self.Client.post('/chats/create_chat/', json.dumps(body), content_type="application/json")
         self.assertEqual(response.status_code, 400)
 
     def test_no_user(self):
@@ -63,8 +64,8 @@ class CreateChatTest(TestCase):
             'members': '@sjkfnvsjklgn',
             'is_channel': False
         }
-        response1 = self.client.post('/chats/create_chat/', json.dumps(body1), content_type="application/json")
-        response2 = self.client.post('/chats/create_chat/', json.dumps(body2), content_type="application/json")
+        response1 = self.Client.post('/chats/create_chat/', json.dumps(body1), content_type="application/json")
+        response2 = self.Client.post('/chats/create_chat/', json.dumps(body2), content_type="application/json")
         self.assertEqual(response1.status_code, 400)
         self.assertEqual(response2.status_code, 400)
 
@@ -76,7 +77,7 @@ class CreateChatTest(TestCase):
             'creator': 4,
             'is_channel': False
         }
-        response = self.client.post('/chats/create_chat/', json.dumps(body), content_type="application/json")
+        response = self.Client.post('/chats/create_chat/', json.dumps(body), content_type="application/json")
         self.assertEqual(response.status_code, 400)
 
     def test_invalid_field(self):
@@ -88,7 +89,7 @@ class CreateChatTest(TestCase):
             'members': '@Michael @Martin @Tigran',
             'is_channel': False
         }
-        response = self.client.post('/chats/create_chat/', json.dumps(body), content_type="application/json")
+        response = self.Client.post('/chats/create_chat/', json.dumps(body), content_type="application/json")
         self.assertEqual(response.status_code, 400)
 
     def test_changes_tag(self):
@@ -100,11 +101,11 @@ class CreateChatTest(TestCase):
             'members': '@Michael @Martin @Tigran',
             'is_channel': False
         }
-        response = self.client.post('/chats/create_chat/', json.dumps(body), content_type="application/json")
+        response = self.Client.post('/chats/create_chat/', json.dumps(body), content_type="application/json")
         self.assertNotEqual(Chat.objects.get(name='asdfghjklqwerty890p').tag, 'Hi Hi')
 
     def test_method_not_allowed(self):
-        response = self.client.get('/chats/create_chat/')
+        response = self.Client.get('/chats/create_chat/')
         self.assertEqual(response.status_code, 405)
 
 
@@ -127,8 +128,8 @@ class SendMessageTest(TestCase):
             'type': 'image',
             'url': '123',
         }
-        response1 = self.client.post('/chats/send_message/', json.dumps(body1), content_type="application/json")
-        response2 = self.client.post('/chats/send_message/', json.dumps(body2), content_type="application/json")
+        response1 = self.Client.post('/chats/send_message/', json.dumps(body1), content_type="application/json")
+        response2 = self.Client.post('/chats/send_message/', json.dumps(body2), content_type="application/json")
         self.assertEqual(response1.status_code, 200)
         self.assertEqual(response2.status_code, 200)
 
@@ -139,7 +140,7 @@ class SendMessageTest(TestCase):
             'type': 'text',
             'content': 'Hello',
         }
-        response = self.client.post('/chats/send_message/', json.dumps(body), content_type="application/json")
+        response = self.Client.post('/chats/send_message/', json.dumps(body), content_type="application/json")
         self.assertEqual(response.status_code, 400)
 
     def test_no_user(self):
@@ -149,7 +150,7 @@ class SendMessageTest(TestCase):
             'type': 'text',
             'content': 'Hello',
         }
-        response = self.client.post('/chats/send_message/', json.dumps(body), content_type="application/json")
+        response = self.Client.post('/chats/send_message/', json.dumps(body), content_type="application/json")
         self.assertEqual(response.status_code, 400)
 
     def test_empty_message(self):
@@ -158,7 +159,7 @@ class SendMessageTest(TestCase):
             'user_id': 5,
             'type': 'text',
         }
-        response = self.client.post('/chats/send_message/', json.dumps(body), content_type="application/json")
+        response = self.Client.post('/chats/send_message/', json.dumps(body), content_type="application/json")
         self.assertEqual(response.status_code, 400)
 
     def test_wrong_type(self):
@@ -174,8 +175,8 @@ class SendMessageTest(TestCase):
             'type': 'qwerty',
             'content': 'Hello',
         }
-        response1 = self.client.post('/chats/send_message/', json.dumps(body1), content_type="application/json")
-        response2 = self.client.post('/chats/send_message/', json.dumps(body2), content_type="application/json")
+        response1 = self.Client.post('/chats/send_message/', json.dumps(body1), content_type="application/json")
+        response2 = self.Client.post('/chats/send_message/', json.dumps(body2), content_type="application/json")
         self.assertEqual(response1.status_code, 400)
         self.assertEqual(response2.status_code, 400)
 
@@ -186,11 +187,11 @@ class SendMessageTest(TestCase):
             'type': 'text',
             'content': 'Hello',
         }
-        response = self.client.post('/chats/send_message/', json.dumps(body), content_type="application/json")
+        response = self.Client.post('/chats/send_message/', json.dumps(body), content_type="application/json")
         self.assertEqual(response.status_code, 400)
 
     def test_method_not_allowed(self):
-        response = self.client.get('/chats/send_message/')
+        response = self.Client.get('/chats/send_message/')
         self.assertEqual(response.status_code, 405)
 
 
@@ -201,19 +202,19 @@ class GetChatListTest(TestCase):
         self.Client = Client()
 
     def test_correct(self):
-        response1 = self.client.get('/chats/chat_list/?id=2')
-        response2 = self.client.get('/chats/chat_list/?id=5')
+        response1 = self.Client.get('/chats/chat_list/?id=2')
+        response2 = self.Client.get('/chats/chat_list/?id=5')
         self.assertEqual(response1.status_code, 200)
         self.assertEqual(response2.status_code, 200)
 
     def test_no_user(self):
-        response1 = self.client.get('/chats/chat_list/?id=500')
-        response2 = self.client.get('/chats/chat_list/')
+        response1 = self.Client.get('/chats/chat_list/?id=500')
+        response2 = self.Client.get('/chats/chat_list/')
         self.assertEqual(response1.status_code, 400)
         self.assertEqual(response2.status_code, 400)
 
     def test_method_not_allowed(self):
-        response = self.client.post('/chats/chat_list/?id=2')
+        response = self.Client.post('/chats/chat_list/?id=2')
         self.assertEqual(response.status_code, 405)
 
 
@@ -231,15 +232,15 @@ class GetMessagesListTest(TestCase):
                                type='image',
                                url='blob')
 
-        response = self.client.get('/chats/chat/?tag=@group_4')
+        response = self.Client.get('/chats/chat/?tag=@group_4')
         self.assertEqual(response.status_code, 200)
 
     def test_no_chat(self):
-        response = self.client.get('/chats/chat/?tag=@gbgffgvf')
+        response = self.Client.get('/chats/chat/?tag=@gbgffgvf')
         self.assertEqual(response.status_code, 400)
 
     def test_method_not_allowed(self):
-        response = self.client.post('/chats/chat/?tag=@group_4')
+        response = self.Client.post('/chats/chat/?tag=@group_4')
         self.assertEqual(response.status_code, 405)
 
 
@@ -250,9 +251,24 @@ class ChatDetailTest(TestCase):
         self.Client = Client()
 
     def test_correct(self):
-        response = self.client.get('/chats/chat_detail/')
+        response = self.Client.get('/chats/chat_detail/')
         self.assertEqual(response.status_code, 200)
 
     def test_method_not_allowed(self):
-        response = self.client.post('/chats/chat_detail/')
+        response = self.Client.post('/chats/chat_detail/')
         self.assertEqual(response.status_code, 405)
+
+
+class MockTest(TestCase):
+    fixtures = ['fixtures.json']
+
+    def setUp(self):
+        self.Client = Client()
+
+    @patch('chats.views.get_message_info')
+    def test_chat_info(self, get_message_info_mock):
+        self.Client.get('/chats/chat/?tag=@group_4')
+        self.Client.get('/chats/chat/?tag=@gbgffgvf')
+        self.Client.get('/chats/chat_list/?id=2')
+
+        self.assertEqual(get_message_info_mock.call_count, 50)

@@ -1,5 +1,7 @@
 import json
+
 from django.test import TestCase, Client
+
 from users.factories import *
 
 
@@ -136,25 +138,25 @@ class UserProfileTest(TestCase):
         self.Client = Client()
 
     def test_correct(self):
-        response = self.client.get('/users/profile/?tag=@Tigran')
+        response = self.Client.get('/users/profile/?tag=@Tigran')
         self.assertEqual(response.status_code, 200)
         self.assertIsNotNone(response.json()['name'])
-        response = self.client.get('/users/profile/?id=1')
+        response = self.Client.get('/users/profile/?id=1')
         self.assertEqual(response.status_code, 200)
         self.assertIsNotNone(response.json()['tag'])
 
     def test_bad_request(self):
-        response = self.client.get('/users/profile/')
+        response = self.Client.get('/users/profile/')
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json()['errors'], 'no id or tag')
 
     def test_no_user(self):
-        response = self.client.get('/users/profile/?tag=trew')
+        response = self.Client.get('/users/profile/?tag=trew')
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json()['errors'], 'no such user')
 
     def test_method_not_allowed(self):
-        response = self.client.post('/users/profile/?tag=trew')
+        response = self.Client.post('/users/profile/?tag=trew')
         self.assertEqual(response.status_code, 405)
 
 
@@ -197,7 +199,7 @@ class SetUserTest(TestCase):
             'new_password': 'qwerty'
         }
 
-        response = self.client.post('/users/set_user/', json.dumps(body), content_type="application/json")
+        response = self.Client.post('/users/set_user/', json.dumps(body), content_type="application/json")
         self.assertEqual(response.status_code, 400)
 
     def test_wrong_old_tag(self):
@@ -210,7 +212,7 @@ class SetUserTest(TestCase):
             'new_password': 'qwerty'
         }
 
-        response = self.client.post('/users/set_user/', json.dumps(body), content_type="application/json")
+        response = self.Client.post('/users/set_user/', json.dumps(body), content_type="application/json")
         self.assertEqual(response.status_code, 400)
 
     def test_tag_exists(self):
@@ -223,7 +225,7 @@ class SetUserTest(TestCase):
             'new_password': 'qwerty'
         }
 
-        response = self.client.post('/users/set_user/', json.dumps(body), content_type="application/json")
+        response = self.Client.post('/users/set_user/', json.dumps(body), content_type="application/json")
         self.assertEqual(response.status_code, 400)
 
     def test_wrong_old_password(self):
@@ -236,11 +238,11 @@ class SetUserTest(TestCase):
             'new_password': 'qwerty'
         }
 
-        response = self.client.post('/users/set_user/', json.dumps(body), content_type="application/json")
+        response = self.Client.post('/users/set_user/', json.dumps(body), content_type="application/json")
         self.assertEqual(response.status_code, 400)
 
     def test_method_not_allowed(self):
-        response = self.client.get('/users/set_user/')
+        response = self.Client.get('/users/set_user/')
         self.assertEqual(response.status_code, 405)
 
 
