@@ -1,0 +1,25 @@
+--
+-- PostgreSQL database cluster dump
+--
+
+SET default_transaction_read_only = off;
+
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+
+--
+-- Roles
+--
+
+CREATE ROLE tigran;
+ALTER ROLE tigran WITH SUPERUSER INHERIT CREATEROLE CREATEDB LOGIN REPLICATION BYPASSRLS PASSWORD 'md5595ecddc236b57902d6504644f2210e0';
+CREATE ROLE tigrankoskelan;
+ALTER ROLE tigrankoskelan WITH SUPERUSER INHERIT CREATEROLE CREATEDB LOGIN REPLICATION BYPASSRLS;
+
+
+
+
+--
+-- PostgreSQL database cluster dump complete
+--
+

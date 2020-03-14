@@ -2,19 +2,42 @@ import json
 
 from django.db.models import F
 from django.http import JsonResponse, HttpResponse
-from django.views.decorators.csrf import csrf_exempt
+# from django.utils.decorators import method_decorator
+# from django.views.decorators.cache import cache_page
+from django.views.decorators.csrf import csrf_exempt  # , csrf_protect
 from django.views.decorators.http import require_POST, require_GET
+from rest_framework import viewsets
+from rest_framework.decorators import action
 
 from chats.forms import *
+from users.serializers import UserSerializer
 
 
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+
+    @staticmethod
+    # @method_decorator(cache_page(60 * 15))
+    @action(methods=['get'], detail=False)
+    def members(request, *args, **kwargs):
+        result = []
+        members = Member.objects.filter(chat__id=request.GET.get('chat_id')). \
+            values_list('user__id', flat=True).order_by('id')
+        for i in list(members):
+            result.append(User.objects.get(id=i))
+        serializer = UserSerializer(result, many=True)
+        return JsonResponse(serializer.data, safe=False)
+
+
+# @cache_page(60 * 15)
 @csrf_exempt
 @require_POST
 def create_chat(request):
     form = NewChatForm(json.loads(request.body))
     if form.is_valid():
         form.save()
-        
+
         return JsonResponse({
             'msg': 'Чат создан',
         })
@@ -22,6 +45,7 @@ def create_chat(request):
         return JsonResponse({'errors': form.errors}, status=400)
 
 
+# @cache_page(60 * 15)
 @csrf_exempt
 @require_POST
 def send_message(request):
@@ -35,6 +59,7 @@ def send_message(request):
         return JsonResponse({'errors': form.errors}, status=400)
 
 
+# @cache_page(60 * 15)
 @csrf_exempt
 @require_GET
 def chat_list(request):
@@ -68,6 +93,7 @@ def chat_list(request):
     return JsonResponse({'chats': chats})
 
 
+# @cache_page(60 * 15)
 @csrf_exempt
 @require_GET
 def one_chat(request):
@@ -88,6 +114,7 @@ def one_chat(request):
     return JsonResponse({'messages': list(messages)})
 
 
+# @cache_page(60 * 15)
 @csrf_exempt
 @require_GET
 def chat_detail(request):

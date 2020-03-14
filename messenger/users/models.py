@@ -8,6 +8,7 @@ class User(AbstractUser):
     bio = models.TextField(default='Newborn Hummingbird', blank=True, null=True, verbose_name='Краткое описание')
     avatar = models.ImageField(blank=True, null=True, verbose_name='Фотография')
     phone = models.CharField(max_length=20, blank=True, null=True, verbose_name='Номер телефона')
+    is_authorised = models.BooleanField(default=False, verbose_name='Авторизован ли пользователь')
 
     class Meta:
         verbose_name = 'Пользователь'

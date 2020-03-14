@@ -1,3 +1,4 @@
+# from captcha.fields import CaptchaField
 from django import forms
 
 from chats.models import *
@@ -39,6 +40,7 @@ class CreateUserForm(forms.Form):
 class AuthForm(forms.Form):
     tag = forms.CharField(max_length=50)
     password = forms.CharField(max_length=50)
+    # captcha = CaptchaField()
     
     def clean_tag(self):
         try:
@@ -54,6 +56,9 @@ class AuthForm(forms.Form):
         correct_pass = User.objects.get(tag=self.cleaned_data['tag']).password
         if self.cleaned_data['password'] != correct_pass:
             self.add_error('password', 'incorrect password')
+
+    def save(self):
+        User.objects.filter(tag=self.cleaned_data['tag']).update(is_authorised=True)
 
 
 class ChangePasswordForm(forms.Form):

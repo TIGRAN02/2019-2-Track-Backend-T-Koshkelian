@@ -1,3 +1,5 @@
+import time
+
 from django.test import TestCase, Client, LiveServerTestCase
 from selenium import webdriver
 
@@ -29,7 +31,7 @@ class SeleniumTests(LiveServerTestCase):
 
     def test_create_account(self):
         self.selenium.get('http://localhost:3000/#/')
-        self.selenium.get_screenshot_as_png()      # иначе не кликает, нужно какое-то действие перед кликом
+        time.sleep(0.1)
         self.selenium.find_element_by_xpath('//*[@id="root"]/div/a').click()
         username_input = self.selenium.find_element_by_xpath('//*[@id="root"]/div/div[2]/div/input[1]')
         username_input.send_keys('Marianna')

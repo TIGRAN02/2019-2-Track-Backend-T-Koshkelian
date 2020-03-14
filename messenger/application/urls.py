@@ -15,12 +15,16 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from .views import fill_db
+# from django.conf.urls import url
+from .views import *
 
 
 urlpatterns = [
     path('users/', include('users.urls')),
+    # url(r'^captcha/', include('captcha.urls')),
     path('chats/', include('chats.urls')),
+    path('csrf/', csrf, name='csrf'),
     path('fill_db/', fill_db, name='fill_db'),
+    path('logout_all/', logout_all, name='logout_all'),
     path('admin/', admin.site.urls),
 ]

@@ -1,4 +1,5 @@
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
+from django.middleware.csrf import get_token
 
 from chats.models import *
 from users.models import *
@@ -86,3 +87,12 @@ def fill_db(request):
                                        content='Message ' + str(k + 1) + ' from member ' + this_user.nick)
 
     return HttpResponse('Database filled')
+
+
+def logout_all(request):
+    User.objects.all().update(is_authorised=False)
+    return HttpResponse('Logout successful')
+
+
+def csrf(request):
+    return JsonResponse({'csrfToken': get_token(request)})

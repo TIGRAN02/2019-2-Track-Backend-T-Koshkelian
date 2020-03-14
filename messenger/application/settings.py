@@ -38,6 +38,8 @@ INSTALLED_APPS = [
   'django.contrib.sessions',
   'django.contrib.messages',
   'django.contrib.staticfiles',
+  'rest_framework',
+  'captcha',
   'corsheaders',
   'chats',
   'users',
@@ -54,14 +56,21 @@ MIDDLEWARE = [
   'django.contrib.auth.middleware.AuthenticationMiddleware',
   'django.contrib.messages.middleware.MessageMiddleware',
   'django.middleware.clickjacking.XFrameOptionsMiddleware',
+  'django_cprofile_middleware.middleware.ProfilerMiddleware',
 ]
 
+DJANGO_CPROFILE_MIDDLEWARE_REQUIRE_STAFF = False
+
 CORS_ORIGIN_ALLOW_ALL = True
+
 CORS_ALLOW_CREDENTIALS = True
+
+CORS_ALLOW_HEADERS = ['X-CSRFToken']
 
 # change to app.example.com in production settings
 CORS_ORIGIN_WHITELIST = ['http://localhost:3000']
-CSRF_TRUSTED_ORIGINS = ['https://localhost:3000']
+
+CSRF_TRUSTED_ORIGINS = ['https://localhost:3000/']
 
 ROOT_URLCONF = 'application.urls'
 
@@ -118,6 +127,15 @@ AUTH_PASSWORD_VALIDATORS = [
   },
 ]
 
+# Cache
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
+        'LOCATION': '127.0.0.1:11211',
+    }
+}
+
 # Internationalization
 # https://docs.djangoproject.com/en/2.2/topics/i18n/
 
@@ -133,21 +151,19 @@ USE_TZ = True
 
 AUTH_USER_MODEL = 'users.User'
 
-LOGIN_URL = 'login'
-LOGIN_REDIRECT_URL = 'home'
-LOGOUT_URL = 'logout'
-LOGOUT_REDIRECT_URL = 'login'
+LOGIN_URL = 'http://localhost:3000/#/'
+LOGIN_REDIRECT_URL = 'http://localhost:3000/#/'
+LOGOUT_URL = 'http://localhost:3000/#/'
+LOGOUT_REDIRECT_URL = 'http://localhost:3000/#/'
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [
-  os.path.join(BASE_DIR, 'static')
-]
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 #  Add configuration for static files storage using whitenoise
-STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 try:
     from .local_settings import *
