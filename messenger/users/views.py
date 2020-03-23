@@ -1,21 +1,21 @@
 import json
 
 from django.http import JsonResponse
-# from django.views.decorators.cache import cache_page
+from django.views.decorators.cache import cache_page
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_POST
 
 from users.forms import *
 
 
-# @cache_page(60 * 15)
+@cache_page(60 * 15)
 @csrf_exempt
 @require_POST
 def create_user(request):
     form = CreateUserForm(json.loads(request.body))
     if form.is_valid():
         form.save()
-        
+
         if json.loads(request.body)['tag'][0] != '@':
             tag = '@' + json.loads(request.body)['tag'].replace(" ", "")
         else:
@@ -29,10 +29,11 @@ def create_user(request):
         return JsonResponse({'errors': form.errors}, status=400)
 
 
-# @cache_page(60 * 15)
+@cache_page(60 * 15)
 @csrf_exempt
 @require_POST
 def authenticate(request):
+    print(request.META)
     data = json.loads(request.body)
     form = AuthForm(data)
     if form.is_valid():
@@ -43,7 +44,7 @@ def authenticate(request):
         return JsonResponse({'errors': form.errors}, status=400)
 
 
-# @cache_page(60 * 15)
+@cache_page(60 * 15)
 @csrf_exempt
 @require_GET
 def logout_view(request):
@@ -54,7 +55,7 @@ def logout_view(request):
         return JsonResponse({'errors': 'no such user'}, status=400)
 
 
-# @cache_page(60 * 15)
+@cache_page(60 * 15)
 @csrf_exempt
 @require_GET
 def check_auth(request):
@@ -69,7 +70,7 @@ def check_auth(request):
         return JsonResponse({'errors': 'no such user'}, status=400)
 
 
-# @cache_page(60 * 15)
+@cache_page(60 * 15)
 @csrf_exempt
 @require_POST
 def change_password(request):
@@ -83,7 +84,7 @@ def change_password(request):
         return JsonResponse({'errors': form.errors}, status=400)
 
 
-# @cache_page(60 * 15)
+@cache_page(60 * 15)
 @csrf_exempt
 @require_GET
 def find_users(request):
@@ -96,7 +97,7 @@ def find_users(request):
     })
 
 
-# @cache_page(60 * 15)
+@cache_page(60 * 15)
 @csrf_exempt
 @require_GET
 def user_profile(request):
@@ -115,7 +116,7 @@ def user_profile(request):
                          'bio': curr_user.bio, })
 
 
-# @cache_page(60 * 15)
+@cache_page(60 * 15)
 @csrf_exempt
 @require_POST
 def set_user(request):
@@ -129,7 +130,7 @@ def set_user(request):
         return JsonResponse({'errors': form.errors}, status=400)
 
 
-# @cache_page(60 * 15)
+@cache_page(60 * 15)
 @csrf_exempt
 @require_POST
 def read_message(request):

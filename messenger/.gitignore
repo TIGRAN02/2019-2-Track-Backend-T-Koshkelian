@@ -1,0 +1,6 @@
+.idea/
+application/__pycache__/
+users/migrations/__pycache__/
+chats/migrations/__pycache__/
+users/__pycache__/
+chats/__pycache__/

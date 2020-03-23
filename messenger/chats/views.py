@@ -2,9 +2,9 @@ import json
 
 from django.db.models import F
 from django.http import JsonResponse, HttpResponse
-# from django.utils.decorators import method_decorator
-# from django.views.decorators.cache import cache_page
-from django.views.decorators.csrf import csrf_exempt  # , csrf_protect
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
+from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST, require_GET
 from rest_framework import viewsets
 from rest_framework.decorators import action
@@ -18,7 +18,7 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
 
     @staticmethod
-    # @method_decorator(cache_page(60 * 15))
+    @method_decorator(cache_page(60 * 15))
     @action(methods=['get'], detail=False)
     def members(request, *args, **kwargs):
         result = []
@@ -30,7 +30,7 @@ class UserViewSet(viewsets.ModelViewSet):
         return JsonResponse(serializer.data, safe=False)
 
 
-# @cache_page(60 * 15)
+@cache_page(60 * 15)
 @csrf_exempt
 @require_POST
 def create_chat(request):
@@ -45,7 +45,7 @@ def create_chat(request):
         return JsonResponse({'errors': form.errors}, status=400)
 
 
-# @cache_page(60 * 15)
+@cache_page(60 * 15)
 @csrf_exempt
 @require_POST
 def send_message(request):
@@ -59,7 +59,7 @@ def send_message(request):
         return JsonResponse({'errors': form.errors}, status=400)
 
 
-# @cache_page(60 * 15)
+@cache_page(60 * 15)
 @csrf_exempt
 @require_GET
 def chat_list(request):
@@ -93,7 +93,7 @@ def chat_list(request):
     return JsonResponse({'chats': chats})
 
 
-# @cache_page(60 * 15)
+@cache_page(60 * 15)
 @csrf_exempt
 @require_GET
 def one_chat(request):
@@ -114,7 +114,7 @@ def one_chat(request):
     return JsonResponse({'messages': list(messages)})
 
 
-# @cache_page(60 * 15)
+@cache_page(60 * 15)
 @csrf_exempt
 @require_GET
 def chat_detail(request):

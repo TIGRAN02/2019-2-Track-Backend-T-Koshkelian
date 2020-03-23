@@ -1,5 +1,6 @@
 from django.http import HttpResponse, JsonResponse
 from django.middleware.csrf import get_token
+from django.core.cache import cache
 
 from chats.models import *
 from users.models import *
@@ -96,3 +97,7 @@ def logout_all(request):
 
 def csrf(request):
     return JsonResponse({'csrfToken': get_token(request)})
+
+
+if __name__ == '__main__':
+    cache.clear()
