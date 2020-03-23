@@ -46,8 +46,8 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-  'whitenoise.middleware.WhiteNoiseMiddleware',
   'django.middleware.security.SecurityMiddleware',
+  'whitenoise.middleware.WhiteNoiseMiddleware',
   'corsheaders.middleware.CorsMiddleware',
   'django.middleware.common.CommonMiddleware',
   'django.contrib.sessions.middleware.SessionMiddleware',
@@ -65,7 +65,7 @@ CORS_ORIGIN_ALLOW_ALL = True
 
 CORS_ALLOW_CREDENTIALS = True
 
-CORS_ALLOW_HEADERS = ['X-CSRFToken']
+CORS_ALLOW_HEADERS = ['Content-Type', 'X-CSRFToken']
 
 # change to app.example.com in production settings
 CORS_ORIGIN_WHITELIST = ['http://localhost:3000']
@@ -98,14 +98,11 @@ WSGI_APPLICATION = 'application.wsgi.application'
 DATABASES = {
   'default': {
     'ENGINE': 'django.db.backends.postgresql_psycopg2',
-    'NAME': 'messenger',
+    'NAME': 'messenger_profile',  # 'messenger',
     'USER': 'tigran',
     'PASSWORD': 'tigrkoshka',
     'HOST': 'localhost',
     'PORT': '5432',
-    'TEST': {
-      'NAME': 'test_db',
-    }
   }
 }
 
