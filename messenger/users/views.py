@@ -33,7 +33,6 @@ def create_user(request):
 @csrf_exempt
 @require_POST
 def authenticate(request):
-    print(request.META)
     data = json.loads(request.body)
     form = AuthForm(data)
     if form.is_valid():

@@ -103,14 +103,6 @@ DATABASES = {
     'PASSWORD': 'tigrkoshka',
     'HOST': 'localhost',
     'PORT': '5432',
-  },
-  'profile': {
-    'ENGINE': 'django.db.backends.postgresql_psycopg2',
-    'NAME': 'messenger_profile',
-    'USER': 'tigran',
-    'PASSWORD': 'tigrkoshka',
-    'HOST': 'localhost',
-    'PORT': '5432'
   }
 }
 
