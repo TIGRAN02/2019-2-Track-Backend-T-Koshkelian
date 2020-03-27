@@ -1,4 +1,6 @@
 import json
+import requests
+from django.conf import settings
 
 from django.db.models import F
 from django.http import JsonResponse, HttpResponse
@@ -52,6 +54,16 @@ def send_message(request):
     form = SendMessageForm(json.loads(request.body))
     if form.is_valid():
         form.save()
+        msg = Message.objects.order_by('-time')[0]
+        requests.post('http://localhost:8080/api', json={
+            "method": "publish",
+            "params": {
+                "channel": "chat" + str(msg.chat.id),
+                "data": {
+                    'message': msg
+                }
+            }
+        }, headers={'Authorization': 'apikey ' + settings.CENTRIFUGE_API})
         return JsonResponse({
             'msg': 'Сообщение отправлено'
         })

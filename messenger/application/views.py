@@ -1,7 +1,9 @@
 from django.http import HttpResponse, JsonResponse
 from django.middleware.csrf import get_token
 from django.core.cache import cache
+import jwt
 
+from django.conf import settings
 from chats.models import *
 from users.models import *
 
@@ -97,6 +99,11 @@ def logout_all(request):
 
 def csrf(request):
     return JsonResponse({'csrfToken': get_token(request)})
+
+
+def centrifugo_token(request):
+    token = jwt.encode({'sub': str(request.user.id)}, settings.CENTRIFUGE_SECRET, algorithm="HS256").decode()
+    return JsonResponse({'token': token})
 
 
 if __name__ == '__main__':

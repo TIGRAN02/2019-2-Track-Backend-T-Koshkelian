@@ -1,6 +1,5 @@
 # from captcha.fields import CaptchaField
 from django import forms
-from captcha.fields import CaptchaField
 
 from chats.models import *
 from users.models import *
@@ -41,7 +40,6 @@ class CreateUserForm(forms.Form):
 class AuthForm(forms.Form):
     tag = forms.CharField(max_length=50)
     password = forms.CharField(max_length=50)
-    captcha = CaptchaField()
     
     def clean_tag(self):
         try:
