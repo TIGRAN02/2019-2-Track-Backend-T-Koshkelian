@@ -27,6 +27,7 @@ SECRET_KEY = 'qq)o820a95r$6%o2qrub!b@)r^grf6_&ycbikf(6h-)v&jmej+'
 DEBUG = False
 
 ALLOWED_HOSTS = ['127.0.0.1',
+                 'localhost',
                  'herokuhummingbird.herokuapp.com']
 
 # Application definition
@@ -72,7 +73,7 @@ CORS_ORIGIN_WHITELIST = ['http://localhost:3000']
 
 CSRF_TRUSTED_ORIGINS = ['https://localhost:3000/']
 
-CENTRIFUGE_ADDRESS = 'http://localhost:8080/api'
+CENTRIFUGE_ADDRESS = 'http://localhost:9000'
 CENTRIFUGE_SECRET = '8883536d-deb4-4730-8a64-0bcc1b0e00f7'
 CENTRIFUGE_API = '280d2d3a-bfbe-42f5-8494-67ef538dfcd6'
 

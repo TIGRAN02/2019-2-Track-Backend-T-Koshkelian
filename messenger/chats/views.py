@@ -1,7 +1,8 @@
 import json
-import requests
-from django.conf import settings
 
+import requests
+from cent import Client
+from django.conf import settings
 from django.db.models import F
 from django.http import JsonResponse, HttpResponse
 from django.utils.decorators import method_decorator
@@ -13,6 +14,9 @@ from rest_framework.decorators import action
 
 from chats.forms import *
 from users.serializers import UserSerializer
+
+
+client = Client(settings.CENTRIFUGE_ADDRESS, settings.CENTRIFUGE_API, timeout=1)
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -32,7 +36,6 @@ class UserViewSet(viewsets.ModelViewSet):
         return JsonResponse(serializer.data, safe=False)
 
 
-@cache_page(60 * 15)
 @csrf_exempt
 @require_POST
 def create_chat(request):
@@ -47,7 +50,6 @@ def create_chat(request):
         return JsonResponse({'errors': form.errors}, status=400)
 
 
-@cache_page(60 * 15)
 @csrf_exempt
 @require_POST
 def send_message(request):
@@ -55,15 +57,22 @@ def send_message(request):
     if form.is_valid():
         form.save()
         msg = Message.objects.order_by('-time')[0]
-        requests.post('http://localhost:8080/api', json={
-            "method": "publish",
-            "params": {
-                "channel": "chat" + str(msg.chat.id),
-                "data": {
-                    'message': msg
-                }
+        to_send = {
+            "status": "ok",
+            "message": {
+                "id": msg.id,
+                "time": msg.time.strftime('%H:%M'),
+                "type": msg.type,
+                "whose": msg.user.id
             }
-        }, headers={'Authorization': 'apikey ' + settings.CENTRIFUGE_API})
+        }
+        if msg.type != "text":
+            to_send["message"]["url"] = msg.url
+        else:
+            to_send["message"]["content"] = msg.content
+
+        client.publish("chat:" + str(msg.chat.tag), to_send)
+
         return JsonResponse({
             'msg': 'Сообщение отправлено'
         })
@@ -71,7 +80,6 @@ def send_message(request):
         return JsonResponse({'errors': form.errors}, status=400)
 
 
-@cache_page(60 * 15)
 @csrf_exempt
 @require_GET
 def chat_list(request):
@@ -105,7 +113,6 @@ def chat_list(request):
     return JsonResponse({'chats': chats})
 
 
-@cache_page(60 * 15)
 @csrf_exempt
 @require_GET
 def one_chat(request):
