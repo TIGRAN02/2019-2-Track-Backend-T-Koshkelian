@@ -1,1 +1,2 @@
+worker: celery -A application worker
 web: gunicorn application.wsgi --log-file -

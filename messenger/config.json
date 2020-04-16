@@ -1,13 +1,13 @@
 {
-  "token_hmac_secret_key": "e5c3ef26-3b79-4d3b-8680-5ed30bc34bc9",
-  "admin_password": "c8db526a-1787-4874-a565-6b3c6a1b3e55",
-  "admin_secret": "8883536d-deb4-4730-8a64-0bcc1b0e00f7",
-  "api_key": "280d2d3a-bfbe-42f5-8494-67ef538dfcd6",
-  "client_anonymous": true,
+  "token_hmac_secret_key": "4488eb185f95a67c2da08d9f098f5e43367d4143e7a1d9cce186b80f223ea621",
+  "admin_password": "631960bd68367426139bfcdd64c390ec6266b99ba97fe016fcb8ae3f44b3c38e",
+  "admin_secret": "5dcaa998b5a116d893c4444668638af4cbacbd342b6833434c04f776c65197dc",
+  "api_key": "62809d26346aa17b9eb38dfd7522fef474cf10d403a18f7c3ccb3d714c280b2c",
+  "client_anonymous": false,
   "namespaces": [
     {
       "name": "chat",
-      "anonymous": true
+      "anonymous": false
     }
   ],
   "log_level": "debug",

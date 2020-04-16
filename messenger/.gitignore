@@ -1,6 +1,10 @@
 .idea/
+venv/
+application/local_settings.py
 application/__pycache__/
 users/migrations/__pycache__/
 chats/migrations/__pycache__/
 users/__pycache__/
 chats/__pycache__/
+*.pyc
+helper_hw*

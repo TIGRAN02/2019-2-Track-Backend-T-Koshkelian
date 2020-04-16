@@ -4,6 +4,8 @@ from django.core.cache import cache
 import jwt
 
 from django.conf import settings
+from django.views.decorators.http import require_GET
+
 from chats.models import *
 from users.models import *
 
@@ -101,8 +103,9 @@ def csrf(request):
     return JsonResponse({'csrfToken': get_token(request)})
 
 
+@require_GET
 def centrifugo_token(request):
-    token = jwt.encode({'sub': str(request.user.id)}, settings.CENTRIFUGE_SECRET, algorithm="HS256").decode()
+    token = jwt.encode({"sub": str(request.GET.get('id'))}, 'secret', algorithm="HS256").decode()
     return JsonResponse({'token': token})
 
 

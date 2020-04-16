@@ -1,17 +1,15 @@
 import json
 
-import requests
 from cent import Client
 from django.conf import settings
 from django.db.models import F
 from django.http import JsonResponse, HttpResponse
-from django.utils.decorators import method_decorator
-from django.views.decorators.cache import cache_page
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST, require_GET
 from rest_framework import viewsets
 from rest_framework.decorators import action
 
+from chats.tasks import send_email
 from chats.forms import *
 from users.serializers import UserSerializer
 
@@ -24,7 +22,6 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
 
     @staticmethod
-    @method_decorator(cache_page(60 * 15))
     @action(methods=['get'], detail=False)
     def members(request, *args, **kwargs):
         result = []
@@ -42,6 +39,12 @@ def create_chat(request):
     form = NewChatForm(json.loads(request.body))
     if form.is_valid():
         form.save()
+
+        send_email.delay(
+            'Chat created',
+            'Congratulations! You successfully created a chat!\n\nLove,\nHummingburd',
+            'tigrankoshkelyan@gmail.com'
+        )
 
         return JsonResponse({
             'msg': 'Чат создан',
@@ -72,7 +75,6 @@ def send_message(request):
             to_send["message"]["content"] = msg.content
 
         client.publish("chat:" + str(msg.chat.tag), to_send)
-
         return JsonResponse({
             'msg': 'Сообщение отправлено'
         })
@@ -133,7 +135,6 @@ def one_chat(request):
     return JsonResponse({'messages': list(messages)})
 
 
-@cache_page(60 * 15)
 @csrf_exempt
 @require_GET
 def chat_detail(request):
