@@ -105,10 +105,9 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'messenger',
-        'USER': 'tigran',
-        'PASSWORD': 'tigrkoshka',
-        'HOST': 'localhost',
-        'PORT': '5432',
+        'USER': 'user',
+        'PASSWORD': 'f2qJ8UnTuhVwMy',
+        'HOST': '95.163.249.18'
     }
 }
 
