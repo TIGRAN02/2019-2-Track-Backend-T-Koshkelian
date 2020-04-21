@@ -1,10 +1,14 @@
 #!/usr/bin/env python3
+from __future__ import absolute_import
 
 import json
 import socket
 import sys
 
+from functools import lru_cache
 
+
+@lru_cache(maxsize=128)
 def parse_url(url):
     socket_client = socket.socket()
     socket_client.connect(('localhost', 8090))
@@ -17,12 +21,15 @@ def parse_url(url):
         data += tmp
         tmp = socket_client.recv(1024)
     url_info = json.loads(data)
-    print(f'Received message is [{url_info}]')
     socket_client.close()
+    return url_info
 
 
 if __name__ == '__main__':
     if len(sys.argv) != 2:
         print(f'Usage: {sys.argv[0]} <url>')
         sys.exit(1)
-    parse_url(sys.argv[1])
+
+    # Один запрос на сервер
+    for i in range(10):
+        print(f'Received message is [{parse_url(sys.argv[1])}]')

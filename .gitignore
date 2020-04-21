@@ -2,7 +2,7 @@ venv/
 *.pyc
 *.swo
 *.swp
-messenger/helper_hw6
+messenger/helper_hw*
 messenger/.idea
 messenger/application/local_settings.py
 messenger/application/__pycache__/
