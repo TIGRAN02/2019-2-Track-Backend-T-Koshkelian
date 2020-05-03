@@ -7,7 +7,6 @@ import sys
 
 from functools import lru_cache
 
-
 @lru_cache(maxsize=128)
 def parse_url(url):
     socket_client = socket.socket()

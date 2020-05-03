@@ -1,4 +1,3 @@
-# from captcha.fields import CaptchaField
 from django import forms
 
 from chats.models import *
